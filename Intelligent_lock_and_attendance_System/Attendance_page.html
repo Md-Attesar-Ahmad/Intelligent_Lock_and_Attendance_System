@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    *{
+      margin: 0;
+      padding:0;
+      box-sizing: border-box;
+    }
+    .screen-header {
+  display: flex;
+  align-items: center;
+  padding: 10px 20px;
+  background: #4d4d4f;
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+  
+}
+    body{
+      background: linear-gradient(to right, #690f0f  0%, #eb466b 100%);
+      font-family: 'Montserrat', sans-serif;
+    }
+    .table-container{
+      padding: 0 10%;
+      flex: 0 1 700px;
+      margin-top: 10.1rem;
+            
+    
+    }
+    .heading{
+      text-align:center;
+      color:#373a3d;
+      margin-bottom: 40px;
+      text-shadow: 7px 7px 14px rgb(0 0 0 / 20%);
+    }
+    .table{
+      width:100%;
+      border: none;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, .4);
+     
+      border-collapse: collapse;
+    }
+    .table thead{
+      background: #4d4d4f;
+    
+    }
+    .table thead tr th{
+      font-size:20px;
+      font-weight:600;
+      letter-spacing: 0.35px;
+      color:#bf7474;
+      opacity:1;
+      padding:12px ;
+      vertical-align:top;
+    }
+    .table tbody tr td{
+      font-size:14px;
+      color:#ea2a6d;
+      letter-spacing:0.35px;
+      font-weight:normal;
+      
+      background-color:#3f3f3e;
+      padding:8px;
+      text-align:center;
+      
+      }
+      .screen-header-left {
+  margin-right: auto;
+}
+
+.screen-header-button {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 3px;
+  border-radius: 8px;
+  background: #bf7474;
+}
+
+.screen-header-button.close {
+  background: #ed1c6f;
+}
+
+.screen-header-button.maximize {
+  background: #e8e925;
+}
+
+.screen-header-button.minimize {
+  background: #74c54f;
+}
+.screen-header {
+  display: flex;
+  align-items: center;
+  padding: 17px 11px;
+  background: #4d4d4f;
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+  width: auto;
+  position: relative;
+}
+.screen-header-right {
+  display: flex;
+}
+
+.screen-header-ellipsis {
+  width: 3px;
+  height: 3px;
+  margin-left: 2px;
+  border-radius: 8px;
+  background: #999;
+}
+.app-form-button1 {
+  margin-bottom: 0;
+  text-align: right;
+  position: absolute;
+  left:31%;
+  text-transform: uppercase;
+  
+}
+.app-form-button2 {
+  margin-bottom: 0;
+  text-align: right;
+  position: absolute;
+  left:59%;
+  text-transform: uppercase;
+}
+.app-form-button {
+    background: none;
+    border: none;
+    color: #ea1d6f;
+    font-size: 14px;
+    cursor: pointer;
+    outline: none;
+}
+.bottom {
+  
+  display: flex;
+  align-items: center;
+  padding: 30px 11px;
+  background: #4d4c4e;
+  border-bottom-left-radius: 15px;
+  border-bottom-right-radius: 15px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, .4);
+  
+}
+.app-form-button1:hover {
+  color: #b9134f;
+}
+.app-form-button2:hover {
+  color: #b9134f;
+}
+.app-form-button1 {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  background: none;
+  border: none;
+  color: #bf7474;
+  font-size: 15px;
+  cursor: pointer;
+  outline: none;
+}
+.app-form-button2 {
+  font-weight: 700;
+  font-family: 'Montserrat', sans-serif;
+  background: none;
+  border: none;
+  color: #bf7474;
+  font-size: 15px;
+  cursor: pointer;
+  outline: none;
+}
+.app-form-control:focus {
+  border-bottom-color: #ddd;
+}
+
+.head {
+  margin-right: auto;
+}
+.middle{
+  color: #bf7474;
+    font-size: 26px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    letter-spacing: 1.4px;
+}
+
+   </style>
+</head>
+<body>
+   <div class="table-container" >
+     <table class="table">
+       <thead>
+        
+        <div class="screen-header">
+         
+          <div class="screen-header-left">
+            <div class="screen-header-button close"></div>
+            <div class="screen-header-button maximize"></div>
+            <div class="screen-header-button minimize"></div>
+          </div>
+          <div class="head">
+            <div class="middle">ATTENDANCE</div>
+          </div>
+          <div class="screen-header-right">
+            <div class="screen-header-ellipsis"></div>
+            <div class="screen-header-ellipsis"></div>
+            <div class="screen-header-ellipsis"></div>
+          </div>
+        </div>
+         <tr>
+           
+           <th>Name</th>
+           <th>Roll No.</th>
+           <th>Attendance</th>
+         </tr>
+       </thead>
+        <tbody>
+          <tr>
+            
+              <td>A</td>
+              <td></td>
+              <td>Absent</td>
+          </tr>
+          <tr>
+          
+            <td>B</td>
+            <td></td>
+            <td>Absent</td>
+          </tr>
+          <tr>
+          
+            <td>C</td>
+            <td></td>
+            <td>Absent</td>
+          </tr>
+          <tr>
+          
+            <td>D</td>
+            <td></td>
+            <td>Absent</td>
+          </tr>
+          <tr>
+          
+            <td>E</td>
+            <td></td>
+            <td>Absent</td>
+          </tr>
+        </tbody>
+     </table>
+     <div class="bottom">
+     <div class="app-form-group buttons">
+    <div >
+      <button class="app-form-button1" onclick="send()">AUTHORIZED</button>
+      <button class="app-form-button2">ENROLLMENT</button>
+    </div>
+    </div>
+    </div>
+   </div>
+   
+</body>
+</html>

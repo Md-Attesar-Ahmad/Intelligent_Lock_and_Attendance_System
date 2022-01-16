@@ -1,0 +1,433 @@
+#include<Adafruit_Fingerprint.h>
+#include<SoftwareSerial.h>
+#include<ESP8266WebServer.h>
+#include<ESP8266WiFi.h>
+#include<WiFiClient.h>
+#include<WebSocketsServer.h>
+#include<ArduinoJson.h>
+
+WebSocketsServer webSocket(81);
+ESP8266WebServer server(80);
+SoftwareSerial mySerial(D2,D3); //(Rx,Tx)
+Adafruit_Fingerprint finger = Adafruit_Fingerprint(&mySerial);
+
+
+uint8_t id;
+int n;
+int idMatch,idArray[5],idd[5],i,j = 0,l=128;
+String person[128];
+String enroll,m;
+String page,Name,page2,appUpdate;
+String text;
+
+
+void records(){
+       digitalWrite(D1,LOW);
+       digitalWrite(D5,LOW);
+       digitalWrite(D6,LOW);
+       page2 = "<!DOCTYPE html> <html lang=\"en\"> <head> <meta charset=\"UTF-8\"> <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\"> <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"> <title>Document</title> <style> *{ margin: 0; padding:0; box-sizing: border-box; } body{ background: linear-gradient(to right, #ea1d6f 0%, #eb466b 100%); font-family: 'Montserrat', sans-serif; } .table-container{ padding: 0 10%; margin:40px auto 0; } .heading{ font-size:40px; text-align:center; color:#373a3d; margin-bottom: 40px; text-shadow: 7px 7px 14px rgb(0 0 0 / 20%); } .table{ width:100%; border: none; border-collapse: collapse; } .table thead{ background: #4d4d4f; } .table thead tr th{ font-size:20px; font-weight:600; letter-spacing: 0.35px; color:#ffff; opacity:1; padding:12px ; vertical-align:top; } .table tbody tr td{ font-size:14px; color:#ea2a6d; letter-spacing:0.35px; font-weight:normal; background-color:#3f3f3e; padding:8px; text-align:center; } .screen-header-left { margin-right: auto; } .screen-header-button { display: inline-block; width: 8px; height: 8px; margin-right: 3px; border-radius: 8px; background: white; } .screen-header-button.close { background: #ed1c6f; } .screen-header-button.maximize { background: #e8e925; } .screen-header-button.minimize { background: #74c54f; } .screen-header { display: flex; align-items: center; padding: 17px 11px; background: #4d4d4f; border-top-left-radius: 15px; border-top-right-radius: 15px; } .screen-header-right { display: flex; } .screen-header-ellipsis { width: 3px; height: 3px; margin-left: 2px; border-radius: 8px; background: #999; } .app-form-button1 { margin-bottom: 0; text-align: right; position: absolute; left:31%; text-transform: uppercase; } .app-form-button2 { margin-bottom: 0; text-align: right; position: absolute; left:59%; text-transform: uppercase; } .app-form-button { background: none; border: none; color: #ea1d6f; font-size: 14px; cursor: pointer; outline: none; } .bottom { display: flex; align-items: center; padding: 30px 11px; background: #4d4c4e; border-bottom-left-radius: 15px; border-bottom-right-radius: 15px; } .app-form-button1:hover { color: #b9134f; } .app-form-button2:hover { color: #b9134f; } .app-form-button1 { font-family: 'Montserrat', sans-serif; font-weight: 700; background: none; border: none; color: #ffff; font-size: 15px; cursor: pointer; outline: none; } .app-form-button2 { font-weight: 700; font-family: 'Montserrat', sans-serif; background: none; border: none; color: #ffff; font-size: 15px; cursor: pointer; outline: none; } .app-form-control:focus { border-bottom-color: #ddd; } .head { margin-right: auto; } .middle{ color: #ffff; font-size: 26px; font-family: 'Montserrat', sans-serif; font-weight: 700; letter-spacing: 1.4px; } </style> </head>"; 
+       page2+= "<body> <div class=\"table-container\" > <h1 class=\"heading\"></h1> <table class=\"table\"> <thead> <div class=\"screen-header\"> <div class=\"screen-header-left\"> <div class=\"screen-header-button close\"></div> <div class=\"screen-header-button maximize\"></div> <div class=\"screen-header-button minimize\"></div> </div> <div class=\"head\"> <div class=\"middle\">ATTENDANCE</div> </div> <div class=\"screen-header-right\"> <div class=\"screen-header-ellipsis\"></div> <div class=\"screen-header-ellipsis\"></div> <div class=\"screen-header-ellipsis\"></div> </div> </div> <tr> <th>S.no</th> <th>Student's Name</th> <th>Roll No.</th> <th>Attendance</th> </tr> </thead>";
+       page2+= "<tbody> <tr> <td>1.</td> <td>"+ String(person[0]) +"</td> <td>" + String(idArray[0]) + "</td> <td id=\"0\" class=\"column\">Absent</td> </tr> <tr> <td>2.</td> <td>"+ String(person[1]) +"</td> <td>" + String(idArray[1]) + "</td> <td id=\"1\" class=\"column\">Absent</td> </tr> <tr> <td>3.</td> <td>"+ String(person[2]) +"</td> <td>" + String(idArray[2]) + "</td> <td id=\"2\" class=\"column\">Absent</td> </tr> <tr> <td>4.</td> <td>"+ String(person[3]) +"</td> <td>" + String(idArray[3]) + "</td> <td id=\"3\" class=\"column\">Absent</td> </tr> <tr> <td>5.</td> <td>"+ String(person[4]) +"</td> <td>" + String(idArray[4]) + "</td> <td id=\"4\" class=\"column\">Absent</td> </tr> </tbody> </table> <div class=\"bottom\"> <div class=\"app-form-group buttons\"> <div> <button class=\"app-form-button1\" onclick=\"send()\">CHECK AUTHORIZED</button> <button class=\"app-form-button2\" onclick=\"window.location='http://'+ location.hostname +'/Enrollment'\">NEW ENROLLMENT</button> </div> </div> </div> </div>\r\n"; 
+       page2+= "<script> var nameArr = [];" ;
+       for(i = 0;i < finger.templateCount;i++){
+         page2 +="nameArr.push ('" + String(person[i]) +"');\r\n" ;}
+       page2+= "var num; setInterval(function () { loadData(\"data.txt\", updateData) }, 1000); function loadData(url, callback) { var xhttp = new XMLHttpRequest(); xhttp.onreadystatechange = function () { if (this.readyState == 4 && this.status == 200) { callback.apply(xhttp); } }; xhttp.open(\"GET\", url, true); xhttp.send(); } function updateData() { num = this.responseText; if(num != 128){ document.getElementById(String(num)).innerHTML = \"Present\";}else if(num == 128){document.getElementByClassName(\"column\").innerText = \"Absent\";} } var s = 'Records'; var y = 0; var connection = new WebSocket('ws://' + location.hostname + ':81/', ['arduino']); connection.onopen = function () { connection.send('Connect ' + new Date()); }; connection.onerror = function (error) { console.log('WebSocket Error ', error); }; connection.onmessage = function (e) { console.log('Server: ', e.data); }; data = { \"x\": s, \"y\": y }; data = JSON.stringify(data); console.log(data); function send() { connection.send(data) }; document.getElementsByTagName('title').innerText = nameArr; </script> </body> </html>";
+
+
+       
+       server.send(200, "text/html",page2);
+
+  
+}
+
+void app(){
+  appUpdate +="<!DOCTYPE html> <html lang=\"en\"><head><meta http-equiv=\"refresh\" content=\"10\"><title>"+ String(person[l]) +"</title></head><body><p>"+ String(person[l]) +"</p></body></html>";
+
+  server.send(200,"text/html",appUpdate);
+}
+
+
+void enrollment(){
+    
+    page ="<!DOCTYPE html> <html lang=\"en\"> <head> <meta charset=\"UTF-8\"> <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\"> <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"> <title>Enroll</title> <style> *, *:before, *:after { box-sizing: border-box; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; } body { background: linear-gradient(to right, #ea1d6f 0%, #eb466b 100%); font-size: 12px; } body, button, input { font-family: 'Montserrat', sans-serif; font-weight: 700; letter-spacing: 1.4px; } .background { display: flex; min-height: 100vh; } .container { flex: 0 1 700px; margin: auto; padding: 10px; } .screen { position: relative; background: #3e3e3e; border-radius: 15px; } .screen:after { content: ''; display: block; position: absolute; top: 0; left: 20px; right: 20px; bottom: 0; border-radius: 15px; box-shadow: 0 20px 40px rgba(0, 0, 0, .4); z-index: -1; } .screen-header { display: flex; align-items: center; padding: 10px 20px; background: #4d4d4f; border-top-left-radius: 15px; border-top-right-radius: 15px; } .screen-header-left { margin-right: auto; } .screen-header-button { display: inline-block; width: 8px; height: 8px; margin-right: 3px; border-radius: 8px; background: white; } .screen-header-button.close { background: #ed1c6f; } .screen-header-button.maximize { background: #e8e925; } .screen-header-button.minimize { background: #74c54f; } .screen-header-right { display: flex; } .screen-header-ellipsis { width: 3px; height: 3px; margin-left: 2px; border-radius: 8px; background: #999; } .screen-body { display: flex; } .screen-body-item { flex: 1; padding: 50px; } .screen-body-item.left { display: flex; flex-direction: column; } .app-title { display: flex; flex-direction: column; position: relative; color: #ea1d6f; font-size: 26px; } .app-title:after { content: ''; display: block; position: absolute; left: 0; bottom: -10px; width: 25px; height: 4px; background: #ea1d6f; } .app-contact { margin-top: auto; font-size: 8px; color: #888; } .app-form-group { margin-bottom: 15px; } .app-form-group.message { margin-top: 40px; } .app-form-group.buttons { margin-bottom: 0; text-align: right; } .app-form-control { width: 100%; padding: 10px 0; background: none; border: none; border-bottom: 1px solid #666; color: #ddd; font-size: 14px; text-transform: uppercase; outline: none; transition: border-color .2s; } .app-form-control::placeholder { color: #666; } .app-form-control:focus { border-bottom-color: #ddd; } .app-form-button { background: none; border: none; color: #ea1d6f; font-size: 14px; cursor: pointer; outline: none; } .app-form-button:hover { color: #b9134f; } .credits { display: flex; justify-content: center; align-items: center; margin-top: 20px; color: #ffa4bd; font-family: 'Roboto Condensed', sans-serif; font-size: 16px; font-weight: normal; } .credits-link { display: flex; align-items: center; color: #fff; font-weight: bold; text-decoration: none; } .dribbble { width: 20px; height: 20px; margin: 0 5px; } \r\n";
+    page +="@media screen and (max-width: 520px) { .screen-body { flex-direction: column; } .screen-body-item.left { margin-bottom: 30px; } .app-title { flex-direction: row; } .app-title span { margin-right: 12px; } .app-title:after { display: none; } } \r\n";
+    page +="@media screen and (max-width: 600px) { .screen-body { padding: 40px; } .screen-body-item { padding: 0; } } </style> </head> <body> <div class=\"background\"> <div class=\"container\"> <div class=\"screen\"> <div class=\"screen-header\"> <div class=\"screen-header-left\"> <div class=\"screen-header-button close\"></div> <div class=\"screen-header-button maximize\"></div> <div class=\"screen-header-button minimize\"></div> </div> <div class=\"screen-header-right\"> <div class=\"screen-header-ellipsis\"></div> <div class=\"screen-header-ellipsis\"></div> <div class=\"screen-header-ellipsis\"></div> </div> </div> <div class=\"screen-body\"> <div class=\"screen-body-item left\"> <div class=\"app-title\"> <span>ENROLLMENT</span> </div> <div class=\"app-contact\">TEAM TITANS</div> </div> <div class=\"screen-body-item\"> <div class=\"app-form\"> <div for='userInput' class=\"app-form-group\"> <input class=\"app-form-control\" id='userInput' placeholder=\"NAME\"> </div> <div for='userID' class=\"app-form-group\"> <input class=\"app-form-control\" id='userID' placeholder=\"ID Number\"> </div> <div class=\"app-form-group buttons\"> <button class=\"app-form-button\" onclick=\"person()\">SUBMIT</button> <button class=\"app-form-button\" onclick = \"window.location = 'http://'+ location.hostname +'/Records'\">RECORDS PAGE</button> </div> </div> </div> </div> </div> </div> </div>"; 
+    page +="<script> var x,y; var data; var connection = new WebSocket ('ws://'+location.hostname+':81/', ['arduino']); function person(){ x = document.getElementById('userInput').value; y = document.getElementById('userID').value; console.log(x,y); send(x,y)} connection.onopen = function () { connection.send('Connect ' + new Date());}; connection.onerror = function (error) {console.log('WebSocket Error ', error);}; connection.onmessage = function (e) {console.log('Server: ', e.data);}; function send(x,y){ data = {\"x\":x,\"y\":y}; data = JSON.stringify(data); console.log(data); connection.send(data);}; </script> </body> </html>\r\n";
+    
+    server.send(200,"text/html",page);
+
+}
+
+void wsEvent(uint8_t num, WStype_t type, uint8_t *payload , size_t length){
+   
+    switch (type)
+    {
+     case WStype_DISCONNECTED:
+      Serial.printf("%u Disconnected/n",num);
+      break;
+     case WStype_CONNECTED:{
+      IPAddress ip=webSocket.remoteIP(num);
+      Serial.printf("%u Connected from %d.%d.%d.%d  url:%s/n",num,ip[0],ip[1],ip[2],ip[3],payload);
+
+      webSocket.sendTXT(num,"connected from server");
+     }
+     break;
+     case WStype_TEXT:
+       String msg=String((char*)(payload));
+//       Serial.println(msg);
+       
+       DynamicJsonDocument doc(200);
+       DeserializationError error = deserializeJson(doc,msg);
+
+       if(error){
+         Serial.println("deserialization failed:");
+         Serial.println(error.c_str());
+         return;
+       }
+       String x = doc["x"];
+       int y = doc["y"];
+       if (x != "Records"){
+         Name = x;
+         id = y;
+         Serial.print("Name: ");
+         Serial.print(Name);
+         Serial.print(" ID: ");
+         Serial.println(id);
+         m = "enroll";
+         getFingerprintEnroll();
+         delay(100);
+       }else if (x == "Records"){
+          m = x;
+       }
+  }
+}
+
+
+
+
+
+
+
+void setup() {
+  // put your setup code here, to run once:
+  WiFi.mode(WIFI_STA);
+  WiFi.begin("Harsh Fiber 2Ghz","123456789@$");  //(your wifi name , password)
+  Serial.begin(115200);
+  Serial.println();
+  Serial.println("Connecting");
+  while(WiFi.status()!= WL_CONNECTED){
+    Serial.print(".");
+    delay(500);
+  }
+  Serial.println();
+  Serial.println("Connected to WiFi....");
+  IPAddress myIP = WiFi.localIP();
+  Serial.println(myIP);
+  delay(100);
+
+  pinMode(D5,OUTPUT);
+  pinMode(D1,OUTPUT);
+  pinMode(D6,OUTPUT);
+  
+  Serial.println("*Fingerprint Attendance*");
+  finger.begin(57600);
+  if(finger.verifyPassword()){
+    Serial.println("Fingerprint module detected");
+  }else{
+    Serial.println("Error: Fingerprint module not found!!!!");
+  }
+  finger.getTemplateCount();
+  if(finger.templateCount == 0){
+    Serial.println("Enroll the finger.....No previous record found.... ");
+  }else{
+    Serial.print("Sensor contains "); 
+    Serial.print(finger.templateCount); 
+    Serial.println(" templates");
+  }
+  server.on("/Enrollment",enrollment);
+  server.on("/Records",records);
+  server.on("/app",app);
+  server.on("/data.txt", [](){
+    
+    text =String(l);
+    server.send(200,"text/html",text);
+      
+    });
+
+  server.begin();
+  webSocket.begin();
+  webSocket.onEvent(wsEvent);
+}
+
+void loop() {
+  server.handleClient();
+  webSocket.loop();
+  if (m == "Records"){
+    n=getFingerprintID();
+    delay(100);
+  }
+}
+
+uint8_t getFingerprintEnroll() {
+
+  int p = -1;
+  digitalWrite(D1,HIGH);
+  digitalWrite(D5,LOW);
+  digitalWrite(D6,LOW);
+  Serial.print("Waiting for valid finger to enroll as #"); 
+  Serial.println(id);
+  while (p != FINGERPRINT_OK) {
+    p = finger.getImage();
+    switch (p) {
+    case FINGERPRINT_OK:
+      Serial.println("Image taken");
+      break;
+    case FINGERPRINT_NOFINGER:
+      Serial.print(".");
+      break;
+    case FINGERPRINT_PACKETRECIEVEERR:
+      Serial.println("Communication error1");
+      break;
+    case FINGERPRINT_IMAGEFAIL:
+      Serial.println("Imaging error");
+      break;
+    default:
+      Serial.println("Unknown error");
+      break;
+    }
+  }
+  p = finger.image2Tz(1);
+  switch (p) {
+    case FINGERPRINT_OK:
+      Serial.println("Image converted");
+      break;
+    case FINGERPRINT_IMAGEMESS:
+      Serial.println("Image too messy");
+      return p;
+    case FINGERPRINT_PACKETRECIEVEERR:
+      Serial.println("Communication error");
+      return p;
+    case FINGERPRINT_FEATUREFAIL:
+      Serial.println("Could not find fingerprint features");
+      return p;
+    case FINGERPRINT_INVALIDIMAGE:
+      Serial.println("Could not find fingerprint features");
+      return p;
+    default:
+      Serial.println("Unknown error");
+      return p;
+  }
+
+  Serial.println("Remove finger");
+  delay(2000);
+  p = 0;
+  while (p != FINGERPRINT_NOFINGER) {
+    p = finger.getImage();
+  }
+  Serial.print("ID: "); 
+  Serial.println(id);
+  p = -1;
+  
+
+                                        //***For Confirmation**** ==>
+
+                                        
+  Serial.println("Place same finger again");
+  while (p != FINGERPRINT_OK) {
+    p = finger.getImage();
+    switch (p) {
+    case FINGERPRINT_OK:
+      Serial.println("Image taken");
+      break;
+    case FINGERPRINT_NOFINGER:
+      Serial.print(".");
+      break;
+    case FINGERPRINT_PACKETRECIEVEERR:
+      Serial.println("Communication error");
+      break;
+    case FINGERPRINT_IMAGEFAIL:
+      Serial.println("Imaging error");
+      break;
+    default:
+      Serial.println("Unknown error");
+      break;
+    }
+  }
+  p = finger.image2Tz(2);
+  switch (p) {
+    case FINGERPRINT_OK:
+      Serial.println("Image converted");
+      break;
+    case FINGERPRINT_IMAGEMESS:
+      Serial.println("Image too messy");
+      return p;
+    case FINGERPRINT_PACKETRECIEVEERR:
+      Serial.println("Communication error");
+      return p;
+    case FINGERPRINT_FEATUREFAIL:
+      Serial.println("Could not find fingerprint features");
+      return p;
+    case FINGERPRINT_INVALIDIMAGE:
+      Serial.println("Could not find fingerprint features");
+      return p;
+    default:
+      Serial.println("Unknown error");
+      return p;
+  }
+  Serial.print("Creating model for #");  Serial.println(id);
+
+  p = finger.createModel();
+  if (p == FINGERPRINT_OK) {
+    Serial.println("Prints matched!");
+  } else if (p == FINGERPRINT_PACKETRECIEVEERR) {
+    Serial.println("Communication error");
+    return p;
+  } else if (p == FINGERPRINT_ENROLLMISMATCH) {
+    Serial.println("Fingerprints did not match");
+    return p;
+  } else {
+    Serial.println("Unknown error");
+    return p;
+  }
+
+  Serial.print("ID "); 
+  Serial.println(id);
+  p = finger.storeModel(id);
+  if (p == FINGERPRINT_OK) {
+    Serial.println("Stored!");
+  } else if (p == FINGERPRINT_PACKETRECIEVEERR) {
+    Serial.println("Communication error");
+    return p;
+  } else if (p == FINGERPRINT_BADLOCATION) {
+    Serial.println("Could not store in that location");
+    return p;
+  } else if (p == FINGERPRINT_FLASHERR) {
+    Serial.println("Error writing to flash");
+    return p;
+  } else {
+    Serial.println("Unknown error");
+    return p;
+  }
+  idArray[j] = id;
+  idd[j]=id;
+  person[j] = Name;
+
+  Serial.print("Name: ");
+  Serial.print(person[j]);
+  Serial.print(" ID: ");
+  Serial.println(idArray[j]);
+  
+  j++;
+  return true;
+}
+
+
+ 
+uint8_t getFingerprintID() {
+//  digitalWrite(D5,HIGH);
+  delay(500);
+  uint8_t p = finger.getImage();
+
+  switch (p) {
+    case FINGERPRINT_OK:
+      Serial.println("Image taken");
+      break;
+    case FINGERPRINT_NOFINGER:
+      Serial.println("No finger detected");
+      return p;
+    case FINGERPRINT_PACKETRECIEVEERR:
+      Serial.println("Communication error2");
+      return p;
+    case FINGERPRINT_IMAGEFAIL:
+      Serial.println("Imaging error");
+      return p;
+    default:
+      Serial.println("Unknown error");
+      return p;
+  }
+  p = finger.image2Tz();
+  switch (p) {
+    case FINGERPRINT_OK:
+      Serial.println("Image converted");
+      break;
+    case FINGERPRINT_IMAGEMESS:
+      Serial.println("Image too messy");
+      return p;
+    case FINGERPRINT_PACKETRECIEVEERR:
+      Serial.println("Communication error");
+      return p;
+    case FINGERPRINT_FEATUREFAIL:
+      Serial.println("Could not find fingerprint features");
+      return p;
+    case FINGERPRINT_INVALIDIMAGE:
+      Serial.println("Could not find fingerprint features");
+      return p;
+    default:
+      Serial.println("Unknown error");
+      return p;
+  }
+  p = finger.fingerSearch();
+  if (p == FINGERPRINT_OK) {
+    Serial.println("Found a print match!");
+    idMatch = finger.fingerID;
+   for(int k = 0;k < 5;k++){
+      if(idd[k]==idMatch){
+        l = k;
+        Serial.println(idMatch);
+        Serial.println("IDMATCHED");
+        digitalWrite(D5,HIGH);
+        digitalWrite(D6,LOW);
+        delay(200);
+        digitalWrite(D5,LOW);
+        digitalWrite(D6,LOW);
+        idd[k]=100;
+      }
+   }
+  } else if (p == FINGERPRINT_PACKETRECIEVEERR) {
+    Serial.println("Communication error");
+    return p;
+  } else if (p == FINGERPRINT_NOTFOUND) {
+      Serial.println("Did not find a match");
+      Serial.println("ID NOT MATCHED");
+      digitalWrite(D6,HIGH);
+      digitalWrite(D5,LOW);
+      return p;
+  } else {
+    Serial.println("Unknown error");
+    return p;
+  }
+  Serial.print("Found ID #"); 
+  Serial.println(finger.fingerID);
+  Serial.print(" with confidence of "); 
+  Serial.println(finger.confidence);
+  
+
+  return finger.fingerID;
+}
+
+//void idCheck(){
+//digitalWrite(D5,LOW);
+//        digitalWrite(D6,LOW);
+//  idMatch = finger.fingerID;
+//   for(int k = 0;k < 5;k++){
+//      if(idArray[k]==idMatch){
+//        l = k;
+//        Serial.println("IDMATCHED");
+//        digitalWrite(D5,HIGH);
+//        digitalWrite(D6,LOW);
+//        delay(200);
+//        digitalWrite(D5,LOW);
+//        digitalWrite(D6,LOW);
+//      }
+//      else if (k==4 && idArray[k]!=idMatch)
+//
+//      {
+//        Serial.println("ID NOT MATCHED");
+//        digitalWrite(D6,HIGH);
+//        digitalWrite(D5,LOW);
+//     
+//    }
+//    
+//   }
+//  }
+

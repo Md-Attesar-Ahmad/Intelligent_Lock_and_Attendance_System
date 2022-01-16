@@ -1,0 +1,116 @@
+int a0,a1,a2;
+unsigned long previous = 0;
+unsigned long interval = 1000;
+
+void setup() 
+{
+  Serial.begin(9600);
+  delay(6000);
+  pinMode(A0,INPUT);//for enrollment
+  pinMode(A1,INPUT);//correct person recognised
+  pinMode(A2,INPUT);//wrong person try to enter
+  pinMode(13,OUTPUT);//for motor control
+  pinMode(12,OUTPUT);//for motor control
+  pinMode(11,OUTPUT);//for buzzer
+  pinMode(10,OUTPUT);//for buzzer
+  pinMode(9,OUTPUT);//for green light
+  pinMode(8,OUTPUT);//for red light
+//  pinMode(7,OUTPUT);//for red light
+//  pinMode(6,OUTPUT);//for red light
+ //digitalWrite(13,HIGH);
+  digitalWrite(12,HIGH);
+  digitalWrite(10,HIGH);
+  digitalWrite(9,HIGH);
+  digitalWrite(8,HIGH);
+  delay(100);
+  digitalWrite(13,LOW);
+  digitalWrite(12,LOW);
+  digitalWrite(10,LOW);
+  digitalWrite(9,LOW);
+  digitalWrite(8,LOW);
+
+  
+}
+
+void enrollment()
+{
+  digitalWrite(10,HIGH);
+  digitalWrite(8,HIGH);
+ 
+  delay(200);
+  digitalWrite(9,HIGH);
+  digitalWrite(8,LOW);
+  digitalWrite(10,LOW);
+  
+  delay(200);
+  digitalWrite(9,LOW);
+}
+void authorised_person()
+{
+  
+  digitalWrite(9,HIGH);;
+  digitalWrite(13,HIGH);
+  digitalWrite(12,LOW);
+  delay(4000);
+  
+  //   Serial.println("TIME:");
+  //  Serial.println((current-previous));
+  
+  digitalWrite(9,LOW);
+  digitalWrite(13,LOW);
+  digitalWrite(12,HIGH);
+  delay(2000);
+  
+  digitalWrite(9,LOW);
+  digitalWrite(13,LOW);
+  digitalWrite(12,LOW);
+  
+//  unsigned long current = millis();
+//  Serial.println("CURRENT:");
+//   Serial.println(current);
+//   
+//  if ((current-previous) > interval * 50) {
+//  previous = current;
+//  }
+}
+void unauthorised_person()
+{
+ 
+   digitalWrite(10,HIGH);
+   digitalWrite(8,HIGH);
+   delay(200);
+   digitalWrite(8,LOW);
+   digitalWrite(10,LOW);
+//   delay(200);
+ 
+//  digitalWrite(8,LOW);
+//  digitalWrite(9,LOW);
+//  digitalWrite(10,LOW);
+}
+void loop() 
+{
+
+ 
+  delay(100);
+  a0=analogRead(A0);
+  a1=analogRead(A1);
+  a2=analogRead(A2);
+  Serial.println("a0="); Serial.println(a0);
+  Serial.println("a1="); Serial.println(a1);
+  Serial.println("a2=");  Serial.println(a2);
+
+ 
+
+  if (a0>600 && a0<=1000)
+  {
+    enrollment();
+  }
+  if (a1>600 && a1<=1000)
+  {
+    authorised_person();
+  }
+  if (a2>600 && a2<=1000)
+  {
+    unauthorised_person();
+  }
+}
